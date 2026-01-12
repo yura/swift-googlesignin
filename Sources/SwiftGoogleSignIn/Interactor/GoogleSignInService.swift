@@ -10,6 +10,15 @@ import GoogleSignIn
 import GoogleSignInSwift
 import Combine
 
+// MARK: - Google SignIn State Enum
+
+// Because we dont need to finish the publisher on errors, so any errors will be sent
+public enum UserSessionState {
+    case connected(UserSession)
+    case disconnected
+    case failed(SwiftError)
+}
+
 // MARK: - Google SignIn Service Protocol
 
 typealias SignInServiceProtocol = SignInLaunchable & SignInObservable
@@ -21,13 +30,13 @@ protocol SignInLaunchable {
 }
 
 protocol SignInObservable {
-    var userSession: CurrentValueSubject<UserSession, SwiftError> { get }
+    var userSession: CurrentValueSubject<UserSessionState, Never> { get }
 }
 
 // MARK: - Google Sign In Service Implementation
 
 class GoogleSignInService: NSObject, ObservableObject {
-    var userSession: CurrentValueSubject<UserSession, SwiftError> = CurrentValueSubject(UserSession.empty)
+    var userSession: CurrentValueSubject<UserSessionState, Never> = CurrentValueSubject(.disconnected)
     
     // Private, Internal variable
     private var configurator: SignInConfigurator
@@ -66,12 +75,12 @@ extension GoogleSignInService: SignInServiceProtocol {
         GIDSignIn.sharedInstance.disconnect { error in
             switch error {
             case .some(let error):
-                self.userSession.send(completion: .failure(SwiftError.message(error.localizedDescription)))
+                self.userSession.send(.failed(SwiftError.message(error.localizedDescription)))
             case .none:
                 // Google Account disconnected from your app.
                 // Perform clean-up actions, such as deleting data associated with the
                 //   disconnected account.
-                self.userSession.send(UserSession.empty)
+                self.userSession.send(.disconnected)
             }
         }
     }
@@ -92,20 +101,20 @@ extension GoogleSignInService {
         } catch SignInError.failedSignIn(let error) {
             if (error as NSError).code == GIDSignInError.hasNoAuthInKeychain.rawValue {
                 let text = "401: \(SignInError.failedSignIn(error).localizedString())"
-                userSession.send(completion: .failure(SwiftError.message(text)))
+                userSession.send(.failed(SwiftError.message(text)))
             } else {
-                userSession.send(completion: .failure(SwiftError.message(error.localizedDescription)))
+                userSession.send(.failed(SwiftError.message(error.localizedDescription)))
             }
         } catch SignInError.undefinedUser {
             let error = SwiftError.systemMessage(401, SignInError.undefinedUser.localizedString())
-            userSession.send(completion: .failure(error))
+            userSession.send(.failed(error))
         } catch SignInError.permissionsError {
             let error = SwiftError.systemMessage(501, SignInError.permissionsError.localizedString())
-            userSession.send(completion: .failure(error))
+            userSession.send(.failed(error))
         } catch SignInError.userDataError {
-            userSession.send(completion: .failure( SwiftError.message(SignInError.userDataError.localizedString())))
+            userSession.send(.failed(SwiftError.message(SignInError.userDataError.localizedString())))
         } catch {
-            userSession.send(completion: .failure(SwiftError.message("Unexpected system error")))
+            userSession.send(.failed(SwiftError.message("Unexpected system error")))
         }
     }
     
@@ -178,9 +187,9 @@ extension GoogleSignInService {
         if let profile = UserProfile(googleUser),
            let remoteSession = UserAuthentication(googleUser) {
             let userSession = UserSession(profile: profile, remoteSession: remoteSession)
-            self.userSession.send(userSession)
+            self.userSession.send(.connected(userSession))
         } else {
-            userSession.send(completion: .failure( SwiftError.message(SignInError.userDataError.localizedDescription)))
+            userSession.send(.failed(SwiftError.message(SignInError.userDataError.localizedDescription)))
         }
     }
 }

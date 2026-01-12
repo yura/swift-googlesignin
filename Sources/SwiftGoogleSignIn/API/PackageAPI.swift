@@ -17,7 +17,7 @@ public protocol SwiftGoogleSignInInterface {
     /// - Parameter scopePermissions: Google API scope permissions
     func initialize(_ scopePermissions: [String]?)
     /// Google user's connect state publisher
-    var publisher: AnyPublisher<UserSession, SwiftError> { get }
+    var publisher: AnyPublisher<UserSessionState, Never> { get }
     /// Please use SignInButton view for log in
     func logIn()
     /// Log out. Handle result via publisher
@@ -55,7 +55,7 @@ open class PackageAPI: SwiftGoogleSignInInterface {
     }()
 
     /// The Client can subscribe on the Google user's connect state
-    public var publisher: AnyPublisher<UserSession, SwiftError> {
+    public var publisher: AnyPublisher<UserSessionState, Never> {
         return interactor.userSession.eraseToAnyPublisher()
     }
 
