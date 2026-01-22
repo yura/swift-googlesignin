@@ -17,10 +17,10 @@ public struct UserAuthentication: Codable, Equatable {
 
     init?(_ googleUser: GIDGoogleUser) {
         if let userId = googleUser.userID,
-           let idToken = googleUser.authentication.idToken {
+           let idToken = googleUser.idToken {
             self.userId = userId
-            self.idToken = idToken
-            accessToken = googleUser.authentication.accessToken
+            self.idToken = idToken.tokenString
+            accessToken = googleUser.accessToken.tokenString
         } else {
             return nil
         }

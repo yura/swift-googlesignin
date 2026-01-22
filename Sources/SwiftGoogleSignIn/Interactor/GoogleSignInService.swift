@@ -60,10 +60,11 @@ extension GoogleSignInService: SignInServiceProtocol {
     /// Signin in and get user accaunt data. Can be used SignInButton as well
     func signIn(with viewController: UIViewController) {
         // https://developers.google.com/identity/sign-in/ios/people#retrieving_user_information
-        GIDSignIn.sharedInstance.signIn(with: configurator.signInConfig,
-                                        presenting: viewController) { [weak self] user, error in
+        GIDSignIn.sharedInstance.signIn(withPresenting: viewController,
+                                        hint: nil, additionalScopes: self.scopePermissions,
+                                        nonce: nil) { [weak self] result, error in
             guard let `self` = self else { return }
-            self.handleSignInResult(user, error)
+            self.handleSignInResult(result?.user, error)
         }
     }
     
@@ -151,11 +152,13 @@ extension GoogleSignInService {
     func addPermissions(with viewController: UIViewController) {
         guard let scopePermissions = scopePermissions else { return}
         // Your app should be verified already, so it does not make sense. I think so.
-        GIDSignIn.sharedInstance.addScopes(scopePermissions,
-                                           presenting: viewController,
-                                           callback: { [weak self] user, error in
-            self?.handleSignInResult(user, error)
-        })
+        fatalError("ASKED FOR SCOPES BUT NOT SUPPORTED ANYMORE?")
+//        GIDSignIn.sharedInstance.scopes
+//            .addScopes(scopePermissions,
+//                                           presenting: viewController,
+//                                           callback: { [weak self] user, error in
+//            self?.handleSignInResult(user, error)
+//        })
     }
 }
 
