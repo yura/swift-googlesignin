@@ -60,6 +60,7 @@ extension GoogleSignInService: SignInServiceProtocol {
     /// Signin in and get user accaunt data. Can be used SignInButton as well
     func signIn(with viewController: UIViewController) {
         // https://developers.google.com/identity/sign-in/ios/people#retrieving_user_information
+        GIDSignIn.sharedInstance.configuration = self.configurator.signInConfig
         GIDSignIn.sharedInstance.signIn(withPresenting: viewController,
                                         hint: nil, additionalScopes: self.scopePermissions,
                                         nonce: nil) { [weak self] result, error in
