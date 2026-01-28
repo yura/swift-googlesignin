@@ -22,8 +22,6 @@ public protocol SwiftGoogleSignInInterface {
     func logIn()
     /// Log out. Handle result via publisher
     func logOut()
-    /// As optional we can send request with scopes
-    func requestPermissions()
     /// The Client has to handle openUrl app delegate event
     /// - Parameter url: URL from app delegate openUrl methode
     func openUrl(_ url: URL) -> Bool
@@ -78,13 +76,5 @@ open class PackageAPI: SwiftGoogleSignInInterface {
     /// Log out from the User's Google Account
     public func logOut() {
         interactor.signOut()
-    }
-
-    /// As optional we can send request with scopes
-    public func requestPermissions() {
-        if presentingViewController == nil {
-            assertionFailure("Please send presentingViewController before")
-        }
-        interactor.addPermissions(with: presentingViewController!)
     }
 }

@@ -26,7 +26,6 @@ typealias SignInServiceProtocol = SignInLaunchable & SignInObservable
 protocol SignInLaunchable {
     func signIn(with viewController: UIViewController)
     func signOut()
-    func addPermissions(with viewController: UIViewController)
 }
 
 protocol SignInObservable {
@@ -150,17 +149,6 @@ extension GoogleSignInService {
         return havePermissions
     }
     
-    func addPermissions(with viewController: UIViewController) {
-        guard let scopePermissions = scopePermissions else { return}
-        // Your app should be verified already, so it does not make sense. I think so.
-        fatalError("ASKED FOR SCOPES BUT NOT SUPPORTED ANYMORE?")
-//        GIDSignIn.sharedInstance.scopes
-//            .addScopes(scopePermissions,
-//                                           presenting: viewController,
-//                                           callback: { [weak self] user, error in
-//            self?.handleSignInResult(user, error)
-//        })
-    }
 }
 
 // MARK: - Restore previous session
