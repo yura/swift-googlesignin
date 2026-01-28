@@ -3,10 +3,9 @@
   <img src="https://img.shields.io/badge/License-MIT-yellow"/>
 </p>
 
-# SwiftGoogleSignIn v1.59
+# SwiftGoogleSignIn for FootBot Specs
 
 SwiftGoogleSignIn is an open-source package which uses [Google Sign-In for iOS and macOS](https://developers.google.com/identity/sign-in/ios/start) and can be used to make sign in.
-[Here](https://github.com/SKrotkih/LiveEvents) you can find an example of using this package.
 
 ## Requirements
 iOS 15, Swift 5.7
@@ -16,7 +15,7 @@ iOS 15, Swift 5.7
 - open your Xcode project for iOS
 - select **File**-**Add packages...**
 - in the Apple Swift Packages screen select **Search or Enter Package URL**
-- enter https://github.com/SKrotkih/swift-googlesignin.git
+- enter https://github.com/yura/swift-googlesignin.git
 - make sure **SwiftGoogleSignIn** is opened
 - press **Add Package** 
 - Xcode creates 'Package Pependencies' group with SwiftGoogleSignIn package with last version 
@@ -73,21 +72,24 @@ initializa method:
 - subscribe on the User sign in result action:
 ```
    SwiftGoogleSignIn.API
-       .publisher
-       .receive(on: RunLoop.main)
-       .sink(
-           receiveCompletion: { result in
-               if case let .failure(error) = result {
-                   // parse the error
-               }},
-            receiveValue: { session in
-               if session.isConnected {
-                   // success connect
-               } else {
-                   // failed connect
-               }
-            }
-        )
+            .publisher
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { state in
+                switch state {
+                case .connected(let session):
+                    if session.isConnected,
+                       let token = session.remoteSession?.accessToken {
+                        // Google session connected
+                    } else {
+                        // Google session disconnected or not known
+                    }
+                case .disconnected:
+                        // Google session disconnected/logout
+                case .failed(let error):
+                        // some error during login
+                }
+            })
+            .store(in: &self.disposables)
 ```      
 
 ## Interface:
@@ -111,7 +113,6 @@ initializa method:
 [Example of using the package](https://github.com/SKrotkih/LiveEvents)
 
 ## History
-
 - 09-12-2022. 1.58 Release. Include SwiftError in to the session publisher 
 - 28-11-2022. 1.56 Release
 - 20-09-2022. 1.43 Release 
