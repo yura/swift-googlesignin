@@ -66,7 +66,7 @@ extension LocalStorage: ConfigurableData {
         } else if let plist = getPlist("Config"), let id = plist[key] as? String, !id.isEmpty {
             return id
         } else {
-            assert(false, "Please put your Client ID into info.plist file in the main bundle as a GoogleAPIClientID value")
+            fatalError("Please put your Client ID into info.plist file in the main bundle as a GoogleAPIClientID value")
         }
     }
 }

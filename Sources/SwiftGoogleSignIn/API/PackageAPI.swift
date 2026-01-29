@@ -17,13 +17,11 @@ public protocol SwiftGoogleSignInInterface {
     /// - Parameter scopePermissions: Google API scope permissions
     func initialize(_ scopePermissions: [String]?)
     /// Google user's connect state publisher
-    var publisher: AnyPublisher<UserSession, SwiftError> { get }
+    var publisher: AnyPublisher<UserSessionState, Never> { get }
     /// Please use SignInButton view for log in
     func logIn()
     /// Log out. Handle result via publisher
     func logOut()
-    /// As optional we can send request with scopes
-    func requestPermissions()
     /// The Client has to handle openUrl app delegate event
     /// - Parameter url: URL from app delegate openUrl methode
     func openUrl(_ url: URL) -> Bool
@@ -55,7 +53,7 @@ open class PackageAPI: SwiftGoogleSignInInterface {
     }()
 
     /// The Client can subscribe on the Google user's connect state
-    public var publisher: AnyPublisher<UserSession, SwiftError> {
+    public var publisher: AnyPublisher<UserSessionState, Never> {
         return interactor.userSession.eraseToAnyPublisher()
     }
 
@@ -78,13 +76,5 @@ open class PackageAPI: SwiftGoogleSignInInterface {
     /// Log out from the User's Google Account
     public func logOut() {
         interactor.signOut()
-    }
-
-    /// As optional we can send request with scopes
-    public func requestPermissions() {
-        if presentingViewController == nil {
-            assertionFailure("Please send presentingViewController before")
-        }
-        interactor.addPermissions(with: presentingViewController!)
     }
 }
